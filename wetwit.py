@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 #
+# Author: Stefano Zamprogno <mie.iscrizioni@gmail.com>
+# Licence: GPL3
+#
 # This plugin need:
 # python (tested only with v2.6.x)
 # python-twitter (tested only with v0.6)
@@ -13,27 +16,22 @@
 # HELP on Usage
 # /twit twits [N]
 #       request latest [N] messages or latest 5 if N not specified
-# /twit sendmsg testo
-#       send 'testo' to twitter
-
-__module_name__ = "wetwit"
-__module_version__ = "0.1.0"
-__module_description__ = "Modulo Python x accedere a twitter"
-__module_author__ = "Stefano Zamprogno <mie.iscrizioni@gmail.com>"
+# /twit sendmsg text2send
+#       send 'text2send' to twitter
 
 import weechat
 import twitter
 
 weechat.register("wetwit.py", "0.1.0", "",
-                            "WeTwit v.0.1.0", "UTF8")
+                            "WeTwit v.0.1.0")
+
 
 # To be SET by you, VERIFY 3 TIMES !!! :)
-user = "John"
-pwd = "Doe"
+user = "john"
+pwd = "doe"
 
 # -----------------------------------------------------------
-# Non modificare oltre questa linea--------------------------
-# Do not modify below source code----------------------------
+# Do not modify below this line------------------------------
 # -----------------------------------------------------------
 
 api = twitter.Api(user, pwd)
@@ -44,7 +42,7 @@ def hook_commands_cb(server, args):
         cmd,txt = args.split(" ", 1)
         cmd = cmd.lower()
         if cmd == "sendmsg":
-            statuses = status = None
+            weechat.prnt("Working...")
             if len(txt) <= 140:
                 status = api.PostUpdate(txt.decode("utf-8"))
                 weechat.prnt("-"*30)
@@ -52,13 +50,15 @@ def hook_commands_cb(server, args):
                 weechat.prnt("-"*30)
                 weechat.prnt("*** TWITTED ***")
             else:
-                statuses = api.PostUpdates(txt.decode("utf-8"), u"/u2026")
+                statuses = api.PostUpdates(txt.decode("utf-8"),
+                                        continuation="...")
                 for s in statuses:
                     weechat.prnt("-"*30)
                     weechat.prnt(s.text.encode('utf-8'))
                     weechat.prnt("-"*30)
                     weechat.prnt("*** TWITTED ***")
         if cmd == "twits":
+            weechat.prnt("Working...")
             statuses = api.GetFriendsTimeline(count=str(txt))
             for s in statuses:
                 weechat.prnt("Data: %s" % s.created_at)
@@ -67,6 +67,7 @@ def hook_commands_cb(server, args):
                 weechat.prnt("---")
     elif len(cmd) == 1:
         if cmd[0].lower() == "twits":
+            weechat.prnt("Working...")
             statuses = api.GetFriendsTimeline(count=5)
             for s in statuses:
                 weechat.prnt("Data: %s" % s.created_at)
@@ -76,8 +77,9 @@ def hook_commands_cb(server, args):
 
     return weechat.PLUGIN_RC_OK
 
-weechat.add_command_handler("twit", "hook_commands_cb", "",
-                "Gestisce i vari comandi twitter")
+weechat.add_command_handler("twit", "hook_commands_cb",
+                        "Send/Receive twitter messages",
+                        "")
 
 
 weechat.prnt("Plugin WeTwit loaded!")
