@@ -1,0 +1,5 @@
+WeTwit 0.1.0
+------------
+A pyhton plugin for weechat to send/read twitter messages.
+Need python-twitter library.
+
